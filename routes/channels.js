@@ -6,10 +6,11 @@ const {body, param, validationResult} = require('express-validator');
 
 const validate = (req, res, next) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+    if (errors.isEmpty()) {
+        next();
+    } else {
         return res.status(400).json(errors.array());
     }
-    next();
 };
 
 router
@@ -151,9 +152,5 @@ router
         )
     }
 ) 
-function notFoundChannel(res) {
-    res.status(404).json({
-        message : `채널 정보를 찾을 수 없습니다.`
-    });
-}
+
 module.exports = router;
