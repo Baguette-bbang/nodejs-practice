@@ -3,6 +3,12 @@ const router = express.Router();
 const conn = require('../db/mariadb');
 const {body, param, validationResult} = require('express-validator');
 
+// jwt 모듈
+const jwt = require('jsonwebtoken');
+// .env 모듈
+const dotenv = require('dotenv');
+dotenv.config();
+
 const validate = (req, res, next) => {
     const errors = validationResult(req);
     if (errors.isEmpty()) {
@@ -33,8 +39,22 @@ router.post(
                 var loginUser = results[0];
 
                 if(loginUser && loginUser.password === password) {
+                    // token 발급
+                    const token = jwt.sign({
+                        email : loginUser.email,
+                        name : loginUser.name
+                    }, process.env.PRIVATE_KEY, {
+                        expiresIn : '30m',
+                        issuer : "baguette-bbang"
+                    });
+
+                    res.cookie("token", token, {
+                        httpOnly : true
+                    });
+
                     res.status(200).json({
-                        message : `${loginUser.name}님 로그인 되었습니다.`
+                        message : `${loginUser.name}님 로그인 되었습니다.`,
+                        token : token
                     })
                 } else {
                     res.status(404).json({
