@@ -1,0 +1,30 @@
+# Node.js 관련
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# 디렉토리 및 파일 생성 후 자동 생성되는 로그 파일
+logs
+*.log
+npm-debug.log*
+
+# 운영체제별 무시 파일
+.DS_Store
+Thumbs.db
+
+# 에디터/IDE 관련 파일
+.vscode/
+.idea/
+*.swp
+
+# 환경 변수 파일
+.env
+**/.env
+
+# 빌드 디렉토리
+dist/
+build/
+
+# 임시 파일
+temp/
+tempCodeRunnerFile.js
