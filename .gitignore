@@ -18,7 +18,6 @@ Thumbs.db
 *.swp
 
 # 환경 변수 파일
-.env
 **/.env
 
 # 빌드 디렉토리
