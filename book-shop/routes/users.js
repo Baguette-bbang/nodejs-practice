@@ -8,7 +8,7 @@ const {
     login, 
     passwordResetRequest, 
     passwordReset
-} = require('../controllers/UserController')
+} = require('../controllers/UserController')
 
 dotenv.config();
 router.use(express.json());
