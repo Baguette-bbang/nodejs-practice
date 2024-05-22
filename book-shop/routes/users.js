@@ -56,10 +56,44 @@ router
     .post(
         [
             body('email').notEmpty().isEmail().withMessage('이메일 입력 요망'),
+            body('password').notEmpty().isString().withMessage('비밀번호 입력 요망'),
             validate
         ]
         , (req, res) => {
+            const {email, password} = req.body;
 
+            let sql = `SELECT * FROM users WHERE email = ?`
+            let values = [email]
+
+            conn.query(sql, values,
+                (err, results) => {
+                    const [loginUser] = results;
+                    if (loginUser && loginUser.password === password) {
+                        const token = jwt.sign({
+                                email : loginUser.email,
+                                name : loginUser.name
+                            }, process.env.PRIVATE_KEY, {
+                                expiresIn : '30m',
+                                issuer : 'Baguette-bbange'
+                            }
+                        );
+
+                        res.cookie("token", token, {
+                            httpOnly : true
+                        });
+
+                        res.status(200).json({
+                            message : `${loginUser.name}님 로그인 되었습니다.`,
+                            token : token
+                        });
+                    } else {
+                        res.status(404).json({
+                            message : `이메일 또는 비밀번호가 틀렸습니다.`
+                        })
+                    }
+
+                }
+            );
         }
     )
 
