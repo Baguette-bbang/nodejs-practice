@@ -1,14 +1,17 @@
 const express = require('express');
 const router = express.Router();
-
+const conn = require('../db/mariadb');
 const dotenv = require('dotenv');
 dotenv.config();
 
 router.use(express.json());
 
-const conn = require('../db/mariadb');
-const jwt = require('jsonwebtoken');
 const {body, param, validationResult} = require('express-validator');
+
+const {
+    getBooks, 
+    bookDetail 
+} = require('../controllers/BookController')
 
 const validate = (req, res, next) => {
     const errors = validationResult(req);
@@ -21,21 +24,23 @@ const validate = (req, res, next) => {
 
 router
     .route('/')
-    // 전체 도서 조회
-    .get(
-        []
-        ,(req, res) => {
-            res.json('전체 도서 조회');
-});
+    // 전체 도서 조회 & 카테고리별 도서 목록 조회
+    .get([
+        validate
+    ]
+    , getBooks
+    )
+    
 
 
 router
     .route('/:id')
     // 개별 도서 조회
-    .get(
-        []
-        , (req, res) => {
-            res.json('개별 도서 조회');
-});
+    .get([
+            param('id').isInt({ min: 1 }).withMessage('ID must be a positive integer'),
+            validate
+        ]
+        , bookDetail
+    );
 
 module.exports = router;
