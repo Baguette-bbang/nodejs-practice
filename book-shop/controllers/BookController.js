@@ -6,7 +6,13 @@ dotenv.config();
 const getBooks = (req, res) => {
     let {category_id, news, limit, currentPage} = req.query;
     let offset = limit * (currentPage - 1);
-    let sql = `SELECT * FROM books`;
+    category_id = parseInt(category_id);
+    let sql = `SELECT *, 
+                (SELECT count(*) 
+                    FROM likes 
+                    WHERE book_id = books.id
+                ) AS likes
+                FROM books`;
     let values = [];
     
     if (category_id && news) {
@@ -57,12 +63,18 @@ const allBooks = (req, res) => {
 }
 
 const bookDetail = (req, res) => {
-    var {id} = req.params;
-    id = parseInt(id);
-    let sql = `SELECT * FROM books 
-                LEFT JOIN categories ON books.category_id = categories.id
-                WHERE books.id = ?`;
-    let values = [id]
+    let {user_id} = req.body;
+    let book_id = req.params.id;
+    
+    let sql = `SELECT 
+                    *,
+                    (SELECT count(*) FROM likes WHERE book_id = books.id) AS likes,
+                    (SELECT EXISTS(SELECT * FROM likes WHERE user_id = ? AND book_id = ?)) as liked
+                    FROM books
+                    LEFT JOIN categories 
+                        ON books.category_id = categories.id    
+                    WHERE books.id = ?`;
+    let values = [user_id, book_id, book_id];
 
     conn.query(sql, values, 
         (err, results) => {
