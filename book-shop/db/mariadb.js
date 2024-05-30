@@ -1,19 +1,26 @@
-const maria = require('mysql2');
+const maria = require('mysql2/promise');
+const dotenv = require('dotenv');
 
-const connection = maria.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'root',
-    database: 'Book-shop',
-    dateStrings: true,
-});
+const connection = async () => {
+    const conn = await maria.createConnection({
+        host: 'localhost',
+        user: 'root',
+        password: 'root',
+        database: 'Book-shop',
+        dateStrings: true,
+    });
+    return conn
+};
 
-connection.connect(error => {
-    if (error) {
+const testConnection = async () => {
+    try {
+        const conn = await connection();
+        console.log('Connected to database.');
+        await conn.end();
+    } catch (error) {
         console.error('Database connection failed: ' + error.stack);
-        return;
     }
-    console.log('Connected to database.');
-});
+};
+testConnection();
 
 module.exports = connection;

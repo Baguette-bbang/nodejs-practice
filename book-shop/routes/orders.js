@@ -10,6 +10,8 @@ const conn = require('../db/mariadb');
 const jwt = require('jsonwebtoken');
 const {body, param, validationResult} = require('express-validator');
 
+const {order, getOrders, getOrderDetail} = require('../controllers/OrderController')
+
 const validate = (req, res, next) => {
     const errors = validationResult(req);
     if(errors.isEmpty()) {
@@ -24,16 +26,12 @@ router
     // 주문 하기
     .post(
         []
-        ,(req, res) => {
-            res.json('주문 하기');
-        }
+        ,order
     )
     // 주문 목록 조회
     .get(
         []
-        ,(req, res) => {
-            res.json('주문 목록 조회');
-        }
+        , getOrders
     )
 
 router
@@ -41,9 +39,7 @@ router
     // 주문 상세 상품 조회
     .get(
         []
-        , (req, res) => {
-            res.json('주문 상세 상품 조회');
-        }
+        , getOrderDetail
     )
 
 module.exports = router;
