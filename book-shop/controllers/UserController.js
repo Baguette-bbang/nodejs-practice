@@ -5,32 +5,36 @@ const crypto = require('crypto'); // 암호화 모듈
 const dotenv = require('dotenv');
 dotenv.config();
 
-const join = (req, res) => {
-    if (req.body == {}) {
-        res.status(400).json({
-            message : `입력 값을 다시 확인해 주시기 바랍니다.`
-        })
-    } else {
-        const {email, name, password, contact} = req.body;
+const join = async (req, res) => {
+    const conn = await connection();
+    const {email, name, password, contact} = req.body;
+    
+    try {
         // 비밀번호 암호화
-        const salt = crypto.randomBytes(10).toString('base64');
-        const hashPassword = crypto.pbkdf2Sync(password, salt, 10000, 10, 'sha512').toString('base64');
+        const { salt, hashPassword } = hashUserPassword(password);
+        const results = await joinByEmail(conn, name, email, hashPassword, contact, salt);
 
-        // 암호화된 비밀번호와 salt 값을 같이 db에 저장
-        let sql = `INSERT INTO users (name, email, password, contact, salt) VALUES (?, ?, ?, ?, ?)`
-        let values = [name, email, hashPassword, contact, salt];
-
-        conn.query(sql, values,
-            (err, results) => {
-                if(err) {
-                    console.log(err);
-                    return res.status(StatusCodes.BAD_REQUEST).end();
-                }
-                return res.status(StatusCodes.CREATED).json(results);
-            }
-        )
+        return res.status(StatusCodes.CREATED).json(results);
+    } catch (err) {
+        console.error(err);
+        return res.status(StatusCodes.BAD_REQUEST).end();
+    } finally {
+        await conn.end(); // 연결 종료
     }
-}
+};
+
+const hashUserPassword = (password) => {
+    const salt = crypto.randomBytes(10).toString('base64');
+    const hashPassword = crypto.pbkdf2Sync(password, salt, 10000, 10, 'sha512').toString('base64');
+    return { salt, hashPassword };
+};
+
+const joinByEmail = async (conn, name, email, hashPassword, contact, salt) => {
+    let sql = `INSERT INTO users (name, email, password, contact, salt) VALUES (?, ?, ?, ?, ?)`
+    let values = [name, email, hashPassword, contact, salt];
+    let [results] = await conn.execute(sql, values)
+    return results
+};
 
 const login = async (req, res) => {
     const conn = await connection();
@@ -38,26 +42,19 @@ const login = async (req, res) => {
     try {
         // 이메일을 통해서 로그인 유저 탐색
         const loginUser = await getUserByEmail(conn, email);
-        // let sql = `SELECT * FROM users WHERE email = ?`;
-        // let [loginUser] = await conn.execute(sql, [email])
-        if (!loginUser) {
-            return res.status(StatusCodes.UNAUTHORIZED).json({
-                message : `이메일 또는 비밀번호가 틀렸습니다.`
-            })
-        }
-        
-        // 이메일이 있다면 (가입된 유저라면) 비밀번호 일치 여부 확인
-        if(loginUser && validatePassword) {
-            const token = generateToken(password, loginUser)
+        const isPasswordValid = validatePassword(password, loginUser);
+
+        if(loginUser && isPasswordValid) {
+            const token = generateToken(loginUser)
             res.cookie("token", token, {
                 httpOnly : true
             });
+            return res.status(StatusCodes.OK).json(loginUser);
         } else {
             return res.status(StatusCodes.UNAUTHORIZED).json({
                 message : `이메일 또는 비밀번호가 틀렸습니다.`
             });
         }
-        return res.status(StatusCodes.OK).json(loginUser);
     } catch (err) {
         console.error(err);
         return res.status(StatusCodes.BAD_REQUEST).end();
@@ -70,15 +67,15 @@ const getUserByEmail = async (conn, email) => {
     let sql = `SELECT * FROM users WHERE email = ?`;
     let [loginUser] = await conn.execute(sql, [email])
 
-    return loginUser[0]
+    return loginUser[0];
 };
 
-const validatePassword = async (password, loginUser) => {
-    const hashPassword = crypto.pbkdf2Sync(password, user.salt, 10000, 64, 'sha512').toString('base64');
-    return user.password === hashPassword;
+const validatePassword = (password, loginUser) => {
+    const hashPassword = crypto.pbkdf2Sync(password, loginUser.salt, 10000, 10, 'sha512').toString('base64');
+    return loginUser.password === hashPassword;
 };
 
-const generateToken = async (password, loginUser) => {
+const generateToken = (loginUser) => {
     const token = jwt.sign({
             email : loginUser.email,
             name : loginUser.name
@@ -87,7 +84,7 @@ const generateToken = async (password, loginUser) => {
             expiresIn : '30m',
             issuer : 'Baguette-bbange'
         }
-    );
+    )
     return token
 };
 
