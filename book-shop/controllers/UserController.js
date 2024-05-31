@@ -1,5 +1,5 @@
 const {StatusCodes, OK} = require('http-status-codes');
-const conn = require('../db/mariadb');
+const connection = require('../db/mariadb');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto'); // 암호화 모듈
 const dotenv = require('dotenv');
@@ -32,48 +32,64 @@ const join = (req, res) => {
     }
 }
 
-const login = (req, res) => {
+const login = async (req, res) => {
+    const conn = await connection();
     const {email, password} = req.body;
+    try {
+        // 이메일을 통해서 로그인 유저 탐색
+        const loginUser = await getUserByEmail(conn, email);
+        // let sql = `SELECT * FROM users WHERE email = ?`;
+        // let [loginUser] = await conn.execute(sql, [email])
+        if (!loginUser) {
+            return res.status(StatusCodes.UNAUTHORIZED).json({
+                message : `이메일 또는 비밀번호가 틀렸습니다.`
+            })
+        }
+        
+        // 이메일이 있다면 (가입된 유저라면) 비밀번호 일치 여부 확인
+        if(loginUser && validatePassword) {
+            const token = generateToken(password, loginUser)
+            res.cookie("token", token, {
+                httpOnly : true
+            });
+        } else {
+            return res.status(StatusCodes.UNAUTHORIZED).json({
+                message : `이메일 또는 비밀번호가 틀렸습니다.`
+            });
+        }
+        return res.status(StatusCodes.OK).json(loginUser);
+    } catch (err) {
+        console.error(err);
+        return res.status(StatusCodes.BAD_REQUEST).end();
+    } finally {
+        await conn.end(); // 연결 종료
+    }    
+}
 
-    let sql = `SELECT * FROM users WHERE email = ?`
-    let values = [email]
+const getUserByEmail = async (conn, email) => {
+    let sql = `SELECT * FROM users WHERE email = ?`;
+    let [loginUser] = await conn.execute(sql, [email])
 
-    conn.query(sql, values,
-        (err, results) => {
-            if(err) {
-                console.log(err);
-                return res.status(StatusCodes.BAD_REQUEST).end();
-            }
+    return loginUser[0]
+};
 
-            const [loginUser] = results;
-            const hashPassword = crypto.pbkdf2Sync(password, loginUser.salt, 10000, 10, 'sha512').toString('base64');
-            if (loginUser && loginUser.password === hashPassword) {
-                const token = jwt.sign({
-                        email : loginUser.email,
-                        name : loginUser.name
-                    }, process.env.PRIVATE_KEY, {
-                        expiresIn : '30m',
-                        issuer : 'Baguette-bbange'
-                    }
-                );
+const validatePassword = async (password, loginUser) => {
+    const hashPassword = crypto.pbkdf2Sync(password, user.salt, 10000, 64, 'sha512').toString('base64');
+    return user.password === hashPassword;
+};
 
-                res.cookie("token", token, {
-                    httpOnly : true
-                });
-
-                return res.status(StatusCodes.OK).json({
-                    // message : `${loginUser.name}님 로그인 되었습니다.`,
-                    // token : token
-                    results
-                });
-            } else {
-                return res.status(StatusCodes.UNAUTHORIZED).json({
-                    message : `이메일 또는 비밀번호가 틀렸습니다.`
-                })
-            }
+const generateToken = async (password, loginUser) => {
+    const token = jwt.sign({
+            email : loginUser.email,
+            name : loginUser.name
+        }, 
+        process.env.PRIVATE_KEY, {
+            expiresIn : '30m',
+            issuer : 'Baguette-bbange'
         }
     );
-}
+    return token
+};
 
 const passwordResetRequest = (req, res) => {
     const {email} = req.body;
