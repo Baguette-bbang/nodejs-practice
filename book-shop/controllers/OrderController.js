@@ -66,9 +66,6 @@ const deleteCartItems = async (conn, items) => {
 const getOrders = async (req, res) => {
     const conn = await connection();
     try {
-        
-        await conn.beginTransaction(); // 트랜잭션 시작
-
         let sql = `SELECT orders.id, book_title, total_quantity, total_price, ordered_at,
                         address, receiver, contact
                     FROM orders LEFT JOIN deliveries
@@ -76,7 +73,6 @@ const getOrders = async (req, res) => {
         let [rows, fields] = await conn.query(sql);
         return res.status(StatusCodes.OK).json(rows);
     } catch (err) {
-        await conn.rollback(); // 트랜잭션 롤백
         console.error(err);
         return res.status(StatusCodes.BAD_REQUEST).end();
     } finally {
@@ -88,8 +84,6 @@ const getOrderDetail = async (req, res) => {
     const {id} = req.params;
     const conn = await connection();
     try {
-        await conn.beginTransaction(); // 트랜잭션 시작
-
         let sql = `SELECT book_id, title, author, price, quantity
                     FROM orderedBooks LEFT JOIN books
                     ON orderedBooks.book_id = books.id
@@ -97,7 +91,6 @@ const getOrderDetail = async (req, res) => {
         let [rows, fields] = await conn.query(sql, [parseInt(id)]);
         return res.status(StatusCodes.OK).json(rows);
     } catch (err) {
-        await conn.rollback(); // 트랜잭션 롤백
         console.error(err);
         return res.status(StatusCodes.BAD_REQUEST).end();
     } finally {
