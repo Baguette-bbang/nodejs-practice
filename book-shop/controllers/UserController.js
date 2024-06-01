@@ -8,7 +8,7 @@ dotenv.config();
 const join = async (req, res) => {
     const conn = await connection();
     const {email, name, password, contact} = req.body;
-    
+
     try {
         // 비밀번호 암호화
         const { salt, hashPassword } = hashUserPassword(password);
@@ -77,6 +77,7 @@ const validatePassword = (password, loginUser) => {
 
 const generateToken = (loginUser) => {
     const token = jwt.sign({
+            user_id : loginUser.id,
             email : loginUser.email,
             name : loginUser.name
         }, 
