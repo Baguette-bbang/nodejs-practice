@@ -88,7 +88,7 @@ const getOrderDetail = async (req, res) => {
                     FROM orderedBooks LEFT JOIN books
                     ON orderedBooks.book_id = books.id
                     WHERE order_id = ?`;
-        let [rows, fields] = await conn.query(sql, [parseInt(id)]);
+        let [rows] = await conn.query(sql, [parseInt(id)]);
         return res.status(StatusCodes.OK).json(rows);
     } catch (err) {
         console.error(err);
