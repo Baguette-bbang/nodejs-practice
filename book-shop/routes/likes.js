@@ -1,14 +1,8 @@
 const express = require('express');
 const router = express.Router();
-
-const dotenv = require('dotenv');
-dotenv.config();
-
 router.use(express.json());
 
-const conn = require('../db/mariadb');
-const jwt = require('jsonwebtoken');
-const {body, param, validationResult} = require('express-validator');
+const {validationResult} = require('express-validator');
 const {addLike, removeLike} = require('../controllers/LikeController');
 
 const validate = (req, res, next) => {
@@ -24,12 +18,12 @@ router
     .route('/:id')
     // 좋아요 추가
     .post(
-        []
+        [validate]
         , addLike
     )
     // 좋아요 삭제
     .delete(
-        []
+        [validate]
         , removeLike
     );
 

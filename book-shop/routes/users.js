@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const dotenv = require('dotenv');
-const {body, param, validationResult} = require('express-validator');
+const {body, validationResult} = require('express-validator');
 
 const {
     join, 
@@ -10,7 +9,6 @@ const {
     passwordReset
 } = require('../controllers/UserController')
 
-dotenv.config();
 router.use(express.json());
 
 const validate = (req, res, next) => {

@@ -1,7 +1,5 @@
 const {StatusCodes} = require('http-status-codes');
 const conn = require('../db/mariadb');
-const dotenv = require('dotenv');
-dotenv.config();
 
 const allCategories  = (req, res) => {
     let sql = "SELECT * FROM categories";

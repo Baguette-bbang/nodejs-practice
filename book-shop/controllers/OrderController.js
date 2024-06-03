@@ -1,7 +1,5 @@
 const {StatusCodes} = require('http-status-codes');
 const connection = require('../db/mariadb');
-const dotenv = require('dotenv');
-dotenv.config();
 
 const order = async (req, res) => {
     const { items, delivery, totalQuantity, totalPrice, userId, firstBookTitle } = req.body;

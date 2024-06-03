@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const dotenv = require('dotenv');
-dotenv.config();
 
 router.use(express.json());
 
-const {body, param, validationResult} = require('express-validator');
+const {validationResult} = require('express-validator');
 
 const {
     allCategories

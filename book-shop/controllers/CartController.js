@@ -2,8 +2,6 @@ const {StatusCodes} = require('http-status-codes');
 const connection = require('../db/mariadb');
 const jwt = require('jsonwebtoken');
 const ensureAuthorization = require('../auth.js'); // 인증 모듈
-const dotenv = require('dotenv');
-dotenv.config();
 
 const addToCart = async (req, res) => {
     const conn = await connection();

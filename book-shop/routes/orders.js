@@ -1,15 +1,8 @@
 const express = require('express');
 const router = express.Router();
-
-const dotenv = require('dotenv');
-dotenv.config();
-
 router.use(express.json());
 
-const conn = require('../db/mariadb');
-const jwt = require('jsonwebtoken');
-const {body, param, validationResult} = require('express-validator');
-
+const {validationResult} = require('express-validator');
 const {order, getOrders, getOrderDetail} = require('../controllers/OrderController')
 
 const validate = (req, res, next) => {
@@ -25,12 +18,12 @@ router
     .route('/')
     // 주문 하기
     .post(
-        []
+        [validate]
         ,order
     )
     // 주문 목록 조회
     .get(
-        []
+        [validate]
         , getOrders
     )
 
@@ -38,7 +31,7 @@ router
     .route('/:id')
     // 주문 상세 상품 조회
     .get(
-        []
+        [validate]
         , getOrderDetail
     )
 

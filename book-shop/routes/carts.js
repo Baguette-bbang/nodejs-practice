@@ -1,14 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-const dotenv = require('dotenv');
-dotenv.config();
-
 router.use(express.json());
 
-const conn = require('../db/mariadb');
 const jwt = require('jsonwebtoken');
-const {body, param, validationResult} = require('express-validator');
+const {validationResult} = require('express-validator');
 
 const {
     addToCart,
@@ -29,12 +25,12 @@ router
     .route('/')
     // 장바구니 담기
     .post(
-        []
+        [validate]
         ,addToCart
     )
     // 장바구니 조회 // 장바구니에서 선택한 주문 예상 상품 목록 조회
     .get(
-        []
+        [validate]
         , getCartItem
     )
     

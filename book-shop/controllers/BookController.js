@@ -1,7 +1,5 @@
 const {StatusCodes} = require('http-status-codes');
 const conn = require('../db/mariadb');
-const dotenv = require('dotenv');
-dotenv.config();
 
 const getBooks = (req, res) => {
     let {category_id, news, limit, currentPage} = req.query;

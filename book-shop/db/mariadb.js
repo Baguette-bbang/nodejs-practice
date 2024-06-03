@@ -1,5 +1,4 @@
 const maria = require('mysql2/promise');
-const dotenv = require('dotenv');
 
 const connection = async () => {
     const conn = await maria.createConnection({
