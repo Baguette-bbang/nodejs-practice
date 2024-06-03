@@ -1,6 +1,7 @@
 const {StatusCodes} = require('http-status-codes');
 const connection = require('../db/mariadb');
 const jwt = require('jsonwebtoken');
+const ensureAuthorization = require('../auth.js'); // 인증 모듈
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -17,6 +18,11 @@ const addToCart = async (req, res) => {
         return res.status(StatusCodes.OK).json(results[0]);
     } catch (err) {
         console.error(err);
+
+        if (err instanceof jwt.JsonWebTokenError || err instanceof jwt.TokenExpiredError) {
+            return res.status(StatusCodes.UNAUTHORIZED).json({ message: '토큰이 유효하지 않거나 만료되었습니다.' });
+        }
+        
         return res.status(StatusCodes.BAD_REQUEST).end();
     } finally {
         await conn.end(); // 연결 종료
@@ -41,6 +47,11 @@ const getCartItem = async (req, res) => {
         return res.status(StatusCodes.OK).json(results);
     } catch (err) {
         console.error(err);
+
+        if (err instanceof jwt.JsonWebTokenError || err instanceof jwt.TokenExpiredError) {
+            return res.status(StatusCodes.UNAUTHORIZED).json({ message: '토큰이 유효하지 않거나 만료되었습니다.' });
+        }
+
         return res.status(StatusCodes.BAD_REQUEST).end();
     } finally {
         await conn.end(); // 연결 종료
@@ -52,7 +63,7 @@ const removeCartItem = async (req, res) => {
     const cartItemId = req.params.id;
     try {
         let sql = `DELETE FROM cartItems WHERE id = ?`
-        const [results] = await conn.execute(sql, cartItemId);
+        const [results] = await conn.execute(sql, [cartItemId]);
 
         return res.status(StatusCodes.OK).json(results);
     } catch (err) {
@@ -62,13 +73,6 @@ const removeCartItem = async (req, res) => {
         await conn.end(); // 연결 종료
     }
 };
-
-const ensureAuthorization = (req) => {
-    let receivedJwt = req.headers["authorization"];
-    let decodedJwt = jwt.verify(receivedJwt, process.env.PRIVATE_KEY);
-
-    return decodedJwt
-}
 
 module.exports = {
     addToCart,
