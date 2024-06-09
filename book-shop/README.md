@@ -38,19 +38,25 @@ Node.js의 이해를 높이고 로그인(JWT), CRUD, DB(MySQL)와의 연계 등�
 ### API 설계
 
 - 회원 API
+
 ![user_api](https://github.com/Baguette-bbang/nodejs-practice/assets/122731556/c97d5e68-1836-4f0f-af31-c7c546dd1d2d)
 
 - 도서 API
+
 ![book_api](https://github.com/Baguette-bbang/nodejs-practice/assets/122731556/0f1c10c2-0b50-4aea-8f4e-0e76d73fbd93)
 
 - 좋아요 API
+
 ![like_api](https://github.com/Baguette-bbang/nodejs-practice/assets/122731556/2f2d3672-34a6-4948-b4c7-6835b6c7f85a)
 
 - 장바구니 API
+
 ![cart_api](https://github.com/Baguette-bbang/nodejs-practice/assets/122731556/1b09f542-570d-478e-9b40-5d09be1e1d7b)
 
 - (결제)주문 API
+
 ![order_api](https://github.com/Baguette-bbang/nodejs-practice/assets/122731556/39599d38-7122-4b37-b591-5b4d78d89a8f)
 
 - 카테고리 API
+
 ![category_api](https://github.com/Baguette-bbang/nodejs-practice/assets/122731556/b4fafd7b-9da1-4fff-a158-0e726e65e380)
