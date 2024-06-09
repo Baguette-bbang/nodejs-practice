@@ -34,7 +34,6 @@ Node.js의 이해를 높이고 로그인(JWT), CRUD, DB(MySQL)와의 연계 등�
 ### ERD
 
 ![book_store_erd](https://github.com/Baguette-bbang/nodejs-practice/assets/122731556/1e054600-7b21-4cba-98b0-be62a506d6b8)
-nodejs-practice/assets/122731556/149ea347-7eea-4293-8109-bf1ad1cdc2e5)
 
 ### API 설계
 
